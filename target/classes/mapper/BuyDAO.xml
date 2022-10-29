@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace에는 DAO가 있는 위치를 지정한다. -->
+<mapper namespace="com.project.greenbook.dao.BuyDAO">
+
+    <select id="cart" resultType="com.project.greenbook.dto.BuyDTO">
+        SELECT * FROM cart
+    </select>
+
+    <delete id="cancel">
+        DELETE FROM cart WHERE book_id=#{book_id}
+    </delete>
+
+    <insert id="cartAdd" parameterType="hashmap" >
+        INSERT INTO cart(book_id,book_price,book_title,book_author,book_publisher,book_description,book_count,id)
+        VALUES(#{book_id},#{book_price},#{book_title},#{book_author},#{book_publisher},#{book_description},1,#{id})
+    </insert>
+
+    <insert id="cartCountUpdate" parameterType="hashmap">
+        UPDATE cart SET book_count = #{count} WHERE book_id=#{book_id}
+    </insert>
+
+</mapper>

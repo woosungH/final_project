@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+    <!-- namespace에는 DAO가 있는 위치를 지정한다. -->
+    <mapper namespace="com.project.greenbook.dao.BookDAO">
+    <!-- id에는 메서드 명을 넣는다. -->
+    <select id="bestSeller" resultType="com.project.greenbook.dto.BookDTO">
+        SELECT book_id,book_title,book_author,publication_date,book_description
+        FROM book_info
+    </select>
+    <!-- 조건문에 판매량을 넣어야하는데 판매량을 알 수 없어 임시로 리스트를 뽑아옴, 판매량 조건으로 정렬 필요-->
+
+    <!-- sql 조각 이용해서 하면 조회문 여러개 사용할 필요없기 때문에 리팩토링 필요 -->
+    <select id="list" resultType="com.project.greenbook.dto.BookDTO">
+        SELECT book_id,book_title,large_category,small_category,book_price,book_author,book_publisher
+        ,publication_date,book_description,book_stock,new_book
+        FROM book_info
+        ORDER BY publication_date desc
+    </select>
+
+    <!-- if문을 이용해 세부 카테고리가 있을 때 없을 때 나눠야함 -->
+    <select id="bookCount" resultType="int">
+        SELECT count(*)
+        FROM book_info
+        <include refid="where" />
+        <if test="searchType != null">
+            <include refid="search" />
+        </if>
+        <if test="title != null">
+            <include refid="usedBook" />
+        </if>
+    </select>
+
+    <!-- if문을 이용해 세부 카테고리가 있을 때 없을 때 나눠야함 -->
+    <select id="bookList" resultType="com.project.greenbook.dto.BookDTO">
+        SELECT book_id,book_title,large_category,small_category,book_price,book_author,book_publisher
+        ,publication_date,book_description,book_stock,new_book
+        FROM book_info
+        <include refid="where" />
+        <if test="searchType != null">
+            <include refid="search" />
+        </if>
+        <if test="title != null">
+            <include refid="usedBook" />
+        </if>
+        ORDER BY BOOK_ID
+        Limit ${displayPost},${postNum}
+    </select>
+
+    <!-- sql code 조각 : 반복되는 sql의 일부를 따로 빼두고 사용 -->
+    <sql id="where">
+        <choose>
+            <when test="smallCategory != null and !smallCategory.equals('')">
+                WHERE large_category = #{largeCategory} AND small_category = #{smallCategory}
+            </when>
+            <otherwise>
+                WHERE large_category = #{largeCategory}
+            </otherwise>
+        </choose>
+    </sql>
+    <sql id="search">
+        <choose>
+            <!--전체 검색인 경우-->
+            <when test="searchType == 'all'">
+                AND (book_title like concat('%', #{searchName}, '%') OR book_author like concat('%', #{searchName}, '%')
+                OR book_publisher like concat('%', #{searchName}, '%') OR book_description like concat('%', #{searchName}, '%'))
+            </when>
+            <!--전체 검색이 아닌 경우-->
+            <otherwise>
+                AND ${searchType} like concat('%', #{searchName}, '%')
+            </otherwise>
+        </choose>
+    </sql>
+    <sql id="usedBook">
+        AND book_title = #{title} AND book_author = #{author}
+    </sql>
+
+    <!-- 테이블의 컬럼과 DTO의 변수가 이름이 다를 경우 둘을 이어준다. -->
+    <!-- Mapping Start -->
+    <resultMap id="bookInfoMap" type="com.project.greenbook.dto.BookInfoDTO">
+        <result column="book_id" property="bookId"></result>
+        <result column="book_title" property="bookTitle"></result>
+        <result column="large_category" property="largeCategory"></result>
+        <result column="small_category" property="smallCategory"></result>
+        <result column="book_price" property="bookPrice"></result>
+        <result column="book_author" property="bookAuthor"></result>
+        <result column="book_publisher" property="bookPublisher"></result>
+        <result column="publication_date" property="publicationDate"></result>
+        <result column="book_description" property="bookDescription"></result>
+        <result column="book_stock" property="bookStock"></result>
+        <result column="new_book" property="newBook"></result>
+    </resultMap>
+
+    <resultMap id="bookImgMap" type="com.project.greenbook.dto.BookImgDTO">
+        <result column="book_id" property="bookId"></result>
+        <result column="origin_file_name" property="originFileName"></result>
+        <result column="stored_file_name" property="storedFileName"></result>
+        <result column="stored_thumbnail" property="storedThumbnail"></result>
+        <result column="file_size" property="fileSize"></result>
+    </resultMap>
+    <!-- Mapping End -->
+
+    <!-- insert Start-->
+    <insert id="register" parameterType="hashmap">
+        INSERT INTO book_info(book_title, large_category , small_category , book_price , book_author
+        , book_publisher , publication_date , book_description , book_stock , new_book
+        ) VALUES( #{bookTitle} , #{largeCategory} , #{smallCategory} , #{bookPrice} , #{bookAuthor}
+        , #{bookPublisher} , #{publicationDate} , #{bookDescription} , 0 , 1
+        );
+    </insert>
+
+    <insert id="registerImg" parameterType="hashmap">
+        INSERT INTO book_img(book_id,origin_file_name, stored_file_name, stored_thumbnail,file_size)
+        VALUES( #{bookId}, #{originFileName}, #{storedFileName}, #{storedThumbnail}, #{fileSize});
+    </insert>
+    <!-- insert End-->
+
+    <!-- update Start-->
+    <update id="receiving" parameterType="hashmap">
+        UPDATE book_info SET book_stock = book_stock + #{bookStock} WHERE book_id = #{bookId}
+    </update>
+
+    <update id="updateInfo" parameterType="hashmap">
+        UPDATE book_info SET book_title = #{bookTitle}, large_category = #{largeCategory}
+        , small_category = #{smallCategory} , book_price = #{bookPrice}, book_author = #{bookAuthor}, book_publisher = #{bookPublisher}
+        , publication_date = #{publicationDate}, book_description = #{bookDescription} WHERE book_id = #{bookId};
+    </update>
+    <update id="updateImg" parameterType="hashmap">
+        UPDATE book_img SET origin_file_name = #{originFileName}, stored_file_name = #{storedFileName}
+        , stored_thumbnail = #{storedThumbnail} , file_size = #{fileSize} WHERE book_id = #{bookId};
+    </update>
+    <!-- update End-->
+
+    <!-- list start -->
+    <select id="bookInfoList" resultMap="bookInfoMap" parameterType="hashMap">
+        SELECT book_id, book_title, large_category, small_category, book_price, book_author, book_publisher
+        , publication_date, book_description, book_stock, new_book FROM book_info
+        WHERE
+        <if test="searchOption == 'book_id'"> book_id</if>
+        <if test="searchOption == 'book_title'"> book_title</if>
+
+        like #{searchText}
+        ORDER BY book_id desc;
+    </select>
+
+    <select id="bookImgList" resultMap="bookImgMap" parameterType="hashMap">
+        SELECT book_id, origin_file_name, stored_file_name, stored_thumbnail, file_size
+        FROM book_img
+        <if test="searchOption == 'book_id'"> WHERE book_id like #{searchText}</if>
+        <if test="searchOption == 'book_title'">
+            WHERE
+            book_id =
+            (SELECT Book_id
+            FROM book_info
+            WHERE Book_title like #{searchText}
+            )
+        </if>
+        ORDER BY book_id desc;
+    </select>
+    <!-- list End -->
+
+    <!-- select start -->
+    <select id="contentInfo" parameterType="String" resultMap="bookInfoMap">
+        SELECT book_id, book_title, large_category, small_category, book_price, book_author, book_publisher
+        , publication_date, book_description, book_stock, new_book
+        FROM book_info
+        WHERE book_id = ${bookId};
+    </select>
+
+    <select id="contentImg" parameterType="String" resultMap="bookImgMap">
+        SELECT book_id, origin_file_name, stored_file_name, stored_thumbnail, file_size
+        FROM book_img
+        WHERE book_id = #{bookId}
+    </select>
+
+    <select id="getMaxId" resultType="int" parameterType="hashmap">
+        SELECT MAX(book_id) FROM book_info;
+    </select>
+
+    <select id="countBookInfo" resultType="int">
+        SELECT COUNT(book_id) FROM book_info;
+    </select>
+    <!-- select end -->
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace에는 DAO가 있는 위치를 지정한다. -->
+<mapper namespace="com.project.greenbook.dao.QnaDAO">
+    <!-- id에는 메서드 명을 넣는다. -->
+    <select id="list" resultType="com.project.greenbook.dto.QnaDTO">
+        SELECT qna_id, qna_name, qna_title, qna_content, qna_date, qna_hit
+        FROM qna_board
+    </select>
+
+    <insert id="write" parameterType="hashmap">
+        INSERT INTO qna_board
+        (qna_ame, qna_title, qna_content, qna_hit)
+        VALUES (#{qna_name},#{qna_title},#{qna_content},0)
+    </insert>
+
+    <select id="contentView" parameterType="hashmap" resultType="com.project.greenbook.dto.QnaDTO">
+        SELECT qna_id, qna_name, qna_title, qna_content, qna_date, qna_hit
+        FROM qna_board
+        WHERE qna_id =#{qna_id}
+    </select>
+
+    <update id="modify" parameterType="hashmap">
+        UPDATE qna_board
+        SET qna_title = #{qna_title}, qna_content = #{qna_content}
+        WHERE qna_id = #{qna_id}
+    </update>
+
+    <delete id="delete" parameterType="hashmap">
+        DELETE
+        FROM qna_board
+        WHERE qna_id = #{qna_id}
+    </delete>
+
+    <update id="upHit" parameterType="hashmap">
+        UPDATE qna_board
+        SET qna_hit = qna_hit + 1
+        WHERE qna_id=#{qna_id}
+    </update>
+
+    <select id="countBookInfo" resultType="int">
+        SELECT COUNT(qna_id)
+        FROM qna_board
+    </select>
+</mapper>

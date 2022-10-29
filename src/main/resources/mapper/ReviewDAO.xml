@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace에는 DAO가 있는 위치를 지정한다. -->
+<mapper namespace="com.project.greenbook.dao.ReviewDAO">
+    <!-- id에는 메서드 명을 넣는다. -->
+    <select id="review" resultType="com.project.greenbook.dto.ReviewDTO">
+        SELECT * FROM book_review
+    </select>
+
+    <!-- parameterType에 hashmap이라고 지정한다. 이후에 변수에는 #{param1}과 같은 형식이 아닌 변수 명을 적는다. -->
+    <insert id="review_write" parameterType="hashmap">
+        INSERT INTO book_review (review_num, book_id, user_id, review_text, review_score, review_date) VALUES
+        (null, 123, 'aaaa', #{review_text}, #{review_score}, now())
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM book_review WHERE user_id = #{user_id} and book_id = #{book_id}
+    </delete>
+
+    <select id="review_sum" resultType="integer">
+        select ifnull (sum(review_score), 0) from book_review where book_id =123;
+    </select>
+
+    <select id="review_count" resultType="int">
+        select count(*) from book_review where book_id = 123;
+    </select>
+
+</mapper>
