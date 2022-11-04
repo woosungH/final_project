@@ -1,0 +1,123 @@
+테이블명 : book_info
+
+CREATE TABLE book_info (
+    book_id int NOT NULL AUTO_INCREMENT,
+    book_title varchar(100) NOT NULL,
+    large_category varchar(30) NOT NULL,
+    small_category varchar(30) DEFAULT NULL,
+    book_price int NOT NULL,
+    book_author varchar(30) DEFAULT NULL,
+    book_publisher varchar(50) DEFAULT NULL,
+    publication_date date DEFAULT NULL,
+    book_description varchar(3000) DEFAULT NULL,
+    book_stock int DEFAULT 0,
+    new_book tinyint(1) DEFAULT NULL,
+    PRIMARY KEY (book_id)
+)
+
+테이블명 : book_img
+
+CREATE TABLE book_img (
+    book_id INT NULL,
+    origin_file_name varchar(100) NULL,
+    stored_file_name varchar(100) NULL,
+    stored_thumbnail varchar(100) NULL,
+    file_size INT NULL,
+    CONSTRAINT book_img_FK FOREIGN KEY (book_id) REFERENCES green.book_info(book_id)
+)
+
+테이블명 : cart
+
+create table cart (
+	book_id int not null,
+	book_price int NOT NULL,
+	book_title varchar(100) NOT NULL,
+	book_author varchar(30) DEFAULT NULL,
+	book_publisher varchar(50) DEFAULT NULL,
+	book_description varchar(3000) DEFAULT NULL,
+	book_count int(30),
+	id varchar(30),
+	CONSTRAINT cart FOREIGN KEY (book_id) REFERENCES green.book_info(book_id)
+);
+
+테이블명 : member
+
+CREATE TABLE member(
+    member_id VARCHAR(50) PRIMARY KEY,
+    member_pwd VARCHAR(50),
+    member_name VARCHAR(30),
+    member_phone VARCHAR(20),
+    member_postcode INT(5),
+    member_email VARCHAR(50),
+    member_address VARCHAR(50),
+    member_detailAddress VARCHAR(50),
+    member_extraAddress VARCHAR(50),
+    member_class int
+);
+
+테이블명 : qna_board
+
+CREATE TABLE qna_board (
+	qna_id INT auto_increment NOT NULL,
+	qna_name varchar(100) NULL,
+	qna_title varchar(100) NULL,
+	qna_content varchar(100) NULL,
+	qna_date DATETIME DEFAULT now() NULL,
+	qna_hit INT null,
+	primary key (qna_id)
+);
+
+테이블명 : book_review
+
+CREATE TABLE book_review (
+    review_num INT NOT NULL AUTO_INCREMENT,
+    book_id int NOT NULL,
+    user_id VARCHAR(20),
+    review_text TEXT,
+    review_score INT,
+    review_date DATETIME default now(),
+    PRIMARY KEY (review_num)
+);
+
+테이블명: book_order
+
+create table book_order (
+	book_id int not null,
+	book_price int NOT NULL,
+	book_title varchar(100) NOT NULL,
+	book_count int(30),
+	book_order_number int(30) not null,
+	member_id varchar(50),
+	member_name varchar(30),
+	member_phone varchar(20),
+	member_email varchar(50),
+	member_postcode INT(5),
+	member_address VARCHAR(50),
+	member_detailAddress VARCHAR(50),
+    member_extraAddress VARCHAR(50),
+	order_date DATETIME
+);
+
+테이블명: book_order_refund
+
+CREATE TABLE book_order_refund (
+    refund_number INT NOT NULL,
+    book_order_number INT NOT NULL,
+    book_stock INT NOT NULL,
+    refund_reason VARCHAR(300) CHARACTER DEFAULT NULL,
+    refund_img VARCHAR(300) CHARACTER SET DEFAULT NULL,
+    member_id VARCHAR(50) NOT NULL,PRIMARY KEY ('refund_number''),
+          KEY `book_order_refund_FK` (`book_order_number`),
+          KEY `book_order_refund_FK_1` (`member_id`),
+CONSTRAINT `book_order_refund_FK_1` FOREIGN KEY (`member_id`) REFERENCES `member` (`member_id`)
+);
+
+테이블명:book_used
+
+CREATE TABLE book_used (
+	book_id INT NOT NULL,
+	member_id varchar(100) NOT NULL,
+	book_status INT NOT NULL,
+	CONSTRAINT book_used_FK FOREIGN KEY (book_id) REFERENCES green.book_info(book_id),
+	CONSTRAINT book_used_FK_1 FOREIGN KEY (member_id) REFERENCES green.`member`(member_id)
+);
