@@ -11,19 +11,22 @@
 <head>
     <title>Title</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <script src="js/jquery.min.js"></script>
     <script>
         function thumbNail(event){
             const reader = new FileReader();
 
             reader.onload = function (event) {
                 //let img = document.createElement("img");
-                let img = document.getElementById("preview_image")
+                let img = document.getElementById("preview_image");
+                console.log(event.target.result);
                 img.setAttribute("src",event.target.result);
                 //img.setAttribute("class","preview_image")
                 document.querySelector("div#image_container").appendChild(img);
             }
             reader.readAsDataURL(event.target.files[0]);
         }
+
     </script>
     <style>
         #preview_image{
@@ -37,31 +40,6 @@
             --bgColor: #3a3a3a;
             --hoverBg: #616161;
             --text: #bbb;
-        }
-
-        .container {
-            width: clamp(0px, 100%, 512px);
-            margin: 32px auto;
-            text-align: center;
-        }
-
-        .label {
-            width: 100%;
-            height: 100%;
-            margin: 0px auto;
-            cursor: pointer;
-            background-color: var(--bgColor);
-        }
-
-        .inner {
-            width: 100%;
-            height: 128px;
-            margin: 64px auto;
-            border-radius: 8px;
-            font-size: 16px;
-            line-height: 128px;
-            background-color: var(--bgColor);
-            color: var(--text);
         }
 
         @media (any-hover: hover){
@@ -97,12 +75,46 @@
             object-fit: cover;
             border-radius: 8px;
         }
+
+         div#editor {
+             padding: 16px 24px;
+             border: 1px solid #D6D6D6;
+             border-radius: 4px;
+         }
+        button.active {
+            background-color: purple;
+            color: #FFF;
+        }
+        #editor img {
+             max-width: 100%;
+         }
+        #img-selector {
+            display: none;
+        }
+        body{
+             max-width: 1200px;
+             margin: 0 auto;
+        }
     </style>
+    <script>
+        const showValue = (target) => {
+            const value = target.value;
+            const text =  target.options[target.selectedIndex].text;
+            if (value=='웹소설/코믹'){
+                document.querySelector(".smallCategory").innerHTML = "<option value='판타지'>판타지</option>"+
+                    "<option value='무협'>무협</option>"+"<option value='로맨스'>로맨스</option>"+"<option value='라이트노벨'>라이트노벨</option>"
+            } else {
+                document.querySelector(".smallCategory").innerHTML = "<option value='소설/시'>소설/시</option>"+
+                    "<option value='에세이'>에세이</option>"+"<option value='인문/역사'>인문/역사</option>"+"<option value='과학'>과학</option>"+
+                    "<option value='경제/경영'>경제/경영</option>"+"<option value='자기계발'>자기계발</option>"
+            }
+        }
+    </script>
 </head>
 <body>
 <div style="margin: 10px;">
     <h3>상품 등록</h3>
-    <form method="post" action="uploadOk" enctype="multipart/form-data">
+    <form method="post" action="product_uploadOk" enctype="multipart/form-data">
         <table class="table table-bordered" style="table-layout: fixed; background-color: #f7f7f7;">
             <tr>
                 <td rowspan="8">
@@ -113,7 +125,8 @@
                 </td>
                 <td>상품명</td>
                 <td colspan="3">
-                    <input type="text" name="title" size="50" placeholder="상품명">
+                    <input type="text" name="bookTitle" size="50" placeholder="상품명">
+                    <input type="hidden" name="member_id" value="">
                 </td>
             </tr>
             <tr>
@@ -121,41 +134,44 @@
                 <td colspan="3">
                     카테고리1 :
 <%--                    <input type="text" name="largeCategory" id="category1">--%>
-                    <select name="largeCategory">
-                        <option value="국내도서">국내도서</option>
-                        <option value="외국도서">외국도서</option>
-                        <option value="eBook">eBook</option>
-                        <option value="웹소설/코믹">웹소설/코믹</option>
-                    </select>
-                    <c:set var="largeCategory" value=""/>
+                    <c:choose>
+                        <c:when test="${sessionScope.member_class eq 2}">
+                            <select name="largeCategory" onchange="showValue(this)">
+<%--                                <option value="">미선택</option>--%>
+                                <option value="국내도서" selected>국내도서</option>
+                                <option value="외국도서">외국도서</option>
+                                <option value="eBook">eBook</option>
+                                <option value="웹소설/코믹">웹소설/코믹</option>
+                            </select>
+                        </c:when>
+                        <c:otherwise>
+                            <select name="largeCategory">
+                                <option value="중고샵">중고샵</option>
+                            </select>
+                        </c:otherwise>
+                    </c:choose>
+
                     카테고리2 :
 <%--                    <input type="text" name="smallCategory" id="category2">--%>
-                    <select name="smallCategory">
-                        <option value="소설">소설</option>
-                        <option value="인문|역사">인문|역사</option>
-                        <option value="예술|종교">예술|종교</option>
-                        <option value="사회|과학">사회|과학</option>
-                        <option value="경제|경영">경제|경영</option>
-                        <option value="자기개발">자기개발</option>
-                        <option value="만화|라이트노벨">만화|라이트노벨</option>
-                        <option value="여행|잡지">여행|잡지</option>
-                        <option value="어린이">어린이</option>
-                        <option value="유아|전집">유아|전집</option>
-                        <option value="청소년">청소년</option>
-                        <option value="요리|육아">요리|육아</option>
-                        <option value="가정살림">가정살림</option>
-                        <option value="건강취미">건강취미</option>
-                        <option value="대학교제">대학교제</option>
-                        <option value="국어와 외국어">국어와 외국어</option>
-                        <option value="IT모바일">IT모바일</option>
-                        <option value="수험서 자격증">수험서 자격증</option>
-                        <option value="초등참고서">초등참고서</option>
-                        <option value="중고등참고서">중고등참고서</option>
-                    </select>
-                    <select name="smallCategory">
-                        <option value="ELT사전">ELT사전</option>
-                        <option></option>
-                    </select>
+                    <c:choose>
+                        <c:when test="${sessionScope.member_class eq 2}">
+                            <select name="smallCategory" class="smallCategory">
+                                <option value='소설/시'>소설/시</option>
+                                <option value='에세이'>에세이</option>
+                                <option value='인문/역사'>인문/역사</option>
+                                <option value='과학'>과학</option>
+                                <option value='경제/경영'>경제/경영</option>
+                                <option value='자기계발'>자기계발</option>
+                            </select>
+                        </c:when>
+                        <c:otherwise>
+                            <select name="smallCategory" class="smallCategory">
+                                <option value="국내도서">국내도서</option>
+                                <option value="외국도서">외국도서</option>
+                                <option value="웹소설/코믹">웹소설/코믹</option>
+                            </select>
+                        </c:otherwise>
+                    </c:choose>
                 </td>
             </tr>
             <tr>
@@ -165,27 +181,27 @@
                 <td><input type="text" name="bookPublisher"></td>
             </tr>
             <tr>
-                <td>상품구분</td>
-                <td><input type="text"></td>
-                <td>ISBN</td>
-                <td><input type="text"></td>
-            </tr>
-            <tr>
                 <td>가격 정보</td>
-                <td colspan="3">
-                    <input type="text" name="bookPrice" id="price"> 원
+                <td colspan="1">
+                    <input type="text" name="bookPrice" id="price" size="10"> 원
                 </td>
+                <c:if test="${sessionScope.get('member_class')==1}">
+                    <td>책 상태</td>
+                    <td>
+                        <select name="bookStatus">
+                            <option value="1">아주 나쁨</option>
+                            <option value="3">나쁨</option>
+                            <option value="5">양호</option>
+                            <option value="7">좋음</option>
+                            <option value="9">아주 좋음</option>
+                        </select>
+                    </td>
+                </c:if>
             </tr>
             <tr>
                 <td>발행일</td>
                 <td colspan="3">
                     <input type="text" name="publicationDate" placeholder="xxxx/xx/xx">
-                </td>
-            </tr>
-            <tr>
-                <td>미성년자구매제한여부</td>
-                <td colspan="3">
-                    <input type="checkbox" name="" id="checkbox">
                 </td>
             </tr>
             <tr>
@@ -200,5 +216,6 @@
         </div>
     </form>
 </div>
+
 </body>
 </html>

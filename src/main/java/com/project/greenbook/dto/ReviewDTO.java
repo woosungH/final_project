@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 public class ReviewDTO {
     int review_num;
     int book_id;
-    String user_id;
+    String member_id;
     String review_text;
     int review_score;
     Timestamp review_date;

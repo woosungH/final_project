@@ -84,6 +84,13 @@ header .input-group input[type=text] {
 #contentView .list-group li > .imgView {
     text-align: center;
 }
+#contentView .list-group li > .imgView div {
+    width: 200px;
+    height: 300px;
+}
+#contentView .list-group li > .imgView div img {
+    width: 100%;
+}
 #contentView .list-group li .button {
     display: flex;
     flex-direction: column;

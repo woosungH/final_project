@@ -61,30 +61,38 @@
                 </ul>
                 <ul class="nav">
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/login">로그인</a>
+                    <c:choose>
+                        <c:when test="${empty sessionScope.member_id}">
+                            <a class="nav-link" aria-current="page" href="/login">로그인</a>
+                        </c:when>
+                        <c:otherwise>
+                            <a class="nav-link" aria-current="page" href="/logout">로그아웃</a>
+                        </c:otherwise>
+                    </c:choose>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/myPage">마이페이지</a>
+                        <c:if test="${not empty sessionScope.member_id}">
+                            <a class="nav-link" aria-current="page" href="/mypage">마이페이지</a>
+                        </c:if>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/product">상품등록</a>
+                        <c:if test="${sessionScope.member_class ne 0 and not empty sessionScope.member_class}">
+                            <a class="nav-link" aria-current="page" href="/product">상품등록</a>
+                        </c:if>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/review">리뷰</a>
+                        <c:if test="${sessionScope.member_class ne 2 and not empty sessionScope.member_class}">
+                            <a class="nav-link" aria-current="page" href="/cart">장바구니</a>
+                        </c:if>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/cart">장바구니</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/order">주문/배송</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/qna">고객센터</a>
+                        <a class="nav-link" aria-current="page" href="/list">고객센터</a>
                     </li>
                 </ul>
             </nav>
         </div>
     </header>
+
     <section id="mainWrapper">
         <div class="container">
             <ul class="tabs">
@@ -96,189 +104,132 @@
             </ul>
             <div id="tab-1" class="tab-content current">
                 <ul class="mainView">
-                <c:set var="loop1" value="false"/>
-                    <%--
-                        list가 book_id 순으로 정렬되어 있기 때문에 순서대로 출력하는데 반복문의 시작지점과 증가값에 랜덤정수를 주어
-                        순서대로 출력되지 않게함
-                    --%>
-                    <c:forEach var="view" items="${bookView}" varStatus="status">
-                        <c:if test="${not loop1}">
-                        <%-- 출력이 4개 되면 break --%>
-                            <c:if test="${view.large_category eq '국내도서'}">
-                                <c:set var="i" value="${i+1}" />
-                                <li>
-                                    <a href="#">
-                                        <c:if test="${view.book_id eq bookImg[status.index].bookId}">
-                                            <img src="upload/${bookImg[status.index].storedThumbnail}.jpg" />
-                                        </c:if>
-                                        <p>${view.book_title}</p>
-                                        <span>${view.book_price}</span>
-                                    </a>
-                                </li>
-                                <c:if test="${i == 4}">
-                                    <%-- 원하는 결과가 나오면 true로 선언 : for문의 break 효과 --%>
-                                    <c:set var="loop1" value="true" />
-                                </c:if>
-                            </c:if>
-                        </c:if>
+                    <c:forEach var="view" items="${bookView1}" begin="0" end="3" varStatus="status">
+                        <c:set var="thumbnail" value="thumbnail${status.index}" />
+                        <c:set var="bookId" value="bookId${status.index}" />
+                        <c:set var="title" value="title${status.index}" />
+                        <c:set var="price" value="price${status.index}" />
+                        <li>
+                            <a href="/review?bookId=${bookView1.get(bookId)}">
+                                <img src="upload/${bookView1.get(thumbnail)}" />
+                                <p>${bookView1.get(title)}</p>
+                                <span>${bookView1.get(price)}</span>
+                            </a>
+                        </li>
                     </c:forEach>
                 </ul>
             </div>
             <div id="tab-2" class="tab-content">
                 <ul class="mainView">
-                    <c:set var="loop" value="false" />
-                    <c:forEach var="view" items="${bookView}" begin="0" end="100" step="1">
-                        <c:if test="${not loop}">
-                            <c:if test="${view.large_category eq '외국도서'}">
-                                <c:set var="j" value="${j+1}" />
-                                <li>
-                                    <a href="#">
-                                        <img src="upload/example2.jpg" />
-                                        <p>${view.book_title}</p>
-                                        <span>${view.book_price}</span>
-                                    </a>
-                                </li>
-                            </c:if>
-                            <c:if test="${j == 4}">
-                                <c:set var="loop" value="true" />
-                            </c:if>
-                        </c:if>
+                    <c:forEach var="view" items="${bookView2}" begin="0" end="3" varStatus="status">
+                        <c:set var="thumbnail" value="thumbnail${status.index}" />
+                        <c:set var="bookId" value="bookId${status.index}" />
+                        <c:set var="title" value="title${status.index}" />
+                        <c:set var="price" value="price${status.index}" />
+                        <li>
+                            <a href="/review?bookId=${bookView2.get(bookId)}">
+                                <img src="upload/${bookView2.get(thumbnail)}" />
+                                <p>${bookView2.get(title)}</p>
+                                <span>${bookView2.get(price)}</span>
+                            </a>
+                        </li>
                     </c:forEach>
                 </ul>
             </div>
             <div id="tab-3" class="tab-content">
                 <ul class="mainView">
-                    <c:set var="loop" value="false"/>
-                    <c:forEach var="view" items="${bookView}" begin="0" end="100" step="1">
-                        <c:if test="${not loop}">
-                            <c:if test="${view.large_category eq 'eBook'}">
-                                <c:set var="k" value="${k+1}" />
-                                <li>
-                                    <a href="#">
-                                        <img src="upload/example3.jpg" />
-                                        <p>${view.book_title}</p>
-                                        <span>${view.book_price}</span>
-                                    </a>
-                                </li>
-                            </c:if>
-                            <c:if test="${k == 4}">
-                                <c:set var="loop" value="true" />
-                            </c:if>
-                        </c:if>
+                    <c:forEach var="view" items="${bookView3}" begin="0" end="3" varStatus="status">
+                        <c:set var="thumbnail" value="thumbnail${status.index}" />
+                        <c:set var="bookId" value="bookId${status.index}" />
+                        <c:set var="title" value="title${status.index}" />
+                        <c:set var="price" value="price${status.index}" />
+                        <li>
+                            <a href="/review?bookId=${bookView3.get(bookId)}">
+                                <img src="upload/${bookView3.get(thumbnail)}" />
+                                <p>${bookView3.get(title)}</p>
+                                <span>${bookView3.get(price)}</span>
+                            </a>
+                        </li>
                     </c:forEach>
                 </ul>
             </div>
             <div id="tab-4" class="tab-content">
                 <ul class="mainView">
-                    <c:set var="loop" value="false"/>
-                    <c:forEach var="view" items="${bookView}" begin="0" end="100" step="1">
-                        <c:if test="${not loop}">
-                            <c:if test="${view.large_category eq '웹소설/코믹'}">
-                                <c:set var="l" value="${l+1}" />
-                                <li>
-                                    <a href="#">
-                                        <img src="img/example4.jpg" />
-                                        <p>${view.book_title}</p>
-                                        <span>${view.book_price}</span>
-                                    </a>
-                                </li>
-                            </c:if>
-                            <c:if test="${l == 4}">
-                                <c:set var="loop" value="true" />
-                            </c:if>
-                        </c:if>
+                    <c:forEach var="view" items="${bookView4}" begin="0" end="3" varStatus="status">
+                        <c:set var="thumbnail" value="thumbnail${status.index}" />
+                        <c:set var="bookId" value="bookId${status.index}" />
+                        <c:set var="title" value="title${status.index}" />
+                        <c:set var="price" value="price${status.index}" />
+                        <li>
+                            <a href="/review?bookId=${bookView4.get(bookId)}">
+                                <img src="upload/${bookView4.get(thumbnail)}" />
+                                <p>${bookView4.get(title)}</p>
+                                <span>${bookView4.get(price)}</span>
+                            </a>
+                        </li>
                     </c:forEach>
                 </ul>
             </div>
             <div id="tab-5" class="tab-content">
                 <ul class="mainView">
-                    <c:set var="loop" value="false"/>
-                    <c:forEach var="view" items="${bookView}" begin="0" end="100" step="1">
-                        <c:if test="${not loop}">
-                            <c:if test="${view.large_category eq '중고샵'}">
-                                <c:set var="m" value="${m+1}" />
-                                <li>
-                                    <a href="#">
-                                        <img src="img/example5.jpg" />
-                                        <p>${view.book_title}</p>
-                                        <span>${view.book_price}</span>
-                                    </a>
-                                </li>
-                            </c:if>
-                            <c:if test="${m == 4}">
-                                <c:set var="loop" value="true" />
-                            </c:if>
-                        </c:if>
+                    <c:forEach var="view" items="${bookView5}" begin="0" end="3" varStatus="status">
+                        <c:set var="thumbnail" value="thumbnail${status.index}" />
+                        <c:set var="bookId" value="bookId${status.index}" />
+                        <c:set var="title" value="title${status.index}" />
+                        <c:set var="price" value="price${status.index}" />
+                        <li>
+                            <a href="/review?bookId=${bookView5.get(bookId)}">
+                                <img src="upload/${bookView5.get(thumbnail)}" />
+                                <p>${bookView5.get(title)}</p>
+                                <span>${bookView5.get(price)}</span>
+                            </a>
+                        </li>
                     </c:forEach>
                 </ul>
             </div>
         </div>
     </section>
     <section id="mainContent">
-        <c:set var="todayBook1"><%= (int)java.lang.Math.round(java.lang.Math.random() * 30 + 1) %></c:set>
-        <c:set var="todayBook2"><%= (int)java.lang.Math.round(java.lang.Math.random() * 30 + 1) %></c:set>
-        <%-- 랜덤한 숫자 2개가 같으면 안되므로 조건문 및 반복문 생성 --%>
-        <%-- doneLoop boolean 변수 선언 --%>
-        <c:set var="loop" value="false"/>
-           <c:forEach begin="0" end="1000">
-            <%-- loop가 반대가 되면 break --%>
-            <c:if test="${not loop}">
-                <c:choose>
-                    <c:when test="${todayBook1 eq todayBook2}">
-                        <c:set var="todayBook2"><%= (int)java.lang.Math.round(java.lang.Math.random() * 20 + 1) %></c:set>
-                    </c:when>
-                    <c:otherwise>
-                        <%-- 원하는 결과가 나오면 true로 선언 : for문의 break 효과 --%>
-                        <c:set var="loop" value="true" />
-                    </c:otherwise>
-                </c:choose>
-            </c:if>
-           </c:forEach>
         <%-- 전체 책 중에서 랜덤한 책 2개를 book ID로 구해서 출력 --%>
         <div class="todayBook">
             <span>오늘의 책</span>
             <div class="todayFirst">
-                <a href="">
-                <c:forEach var="view" items="${todayBook}">
-                    <c:if test="${view.book_id eq todayBook1}">
-                        <img src="upload/example6.jpg" />
-                        <div>
-                            <p><c:out value="${view.book_title}" />-<c:out value="${view.book_author}" /></p>
-                            <span><c:out value="${view.book_description}" /></span>
-                        </div>
-                    </c:if>
-                </c:forEach>
+                <a href="/review?bookId=${todayInfo1.bookId}">
+                    <img src="upload/${todayImg1.storedThumbnail}" />
+                    <div>
+                        <p><c:out value="${todayInfo1.bookTitle}" />-<c:out value="${todayInfo1.bookAuthor}" /></p>
+                        <span><c:out value="${todayInfo1.bookDescription}" /></span>
+                    </div>
                 </a>
             </div>
             <div class="todaySecond">
-                <a href="">
-                <c:forEach var="view" items="${todayBook}">
-                    <c:if test="${view.book_id eq todayBook2}">
-                    <img src="upload/example7.jpg" />
+                <a href="/review?bookId=${todayInfo2.bookId}">
+                    <img src="upload/${todayImg2.storedThumbnail}" />
                     <div>
-                        <p><c:out value="${view.book_title}" />-<c:out value="${view.book_author}" /></p>
-                        <span><c:out value="${view.book_description}" /></span>
+                        <p><c:out value="${todayInfo2.bookTitle}" />-<c:out value="${todayInfo2.bookAuthor}" /></p>
+                        <span><c:out value="${todayInfo2.bookDescription}" /></span>
                     </div>
-                    </c:if>
-                </c:forEach>
                 </a>
             </div>
         </div>
         <div class="bestSeller">
             <span>Best Seller</span>
             <ul class="slider">
-                <c:forEach var="bestSeller" items="${bestSeller}" begin="0" end="9" step="1">
-                <a href="">
+                 <c:forEach items="${best}" begin="0" end="9" varStatus="status">
+                    <c:set var="book_thumbnail" value="thumbnail${status.index}" />
+                    <c:set var="book_id" value="bookId${status.index}" />
+                    <c:set var="book_title" value="title${status.index}" />
+                    <c:set var="book_description" value="description${status.index}" />
+                    <a href="/review?bookId=${best.get(book_id)}">
                     <li>
-                        <img src="upload/example8.jpg" />
-                        <p>${bestSeller.book_title}</p>
-                        <span class="description" style="width : 260px; text-overflow: ellipsis; white-space : nowrap; overflow : hidden; display : block;">
-                            ${bestSeller.book_description}
-                        </span>
+                        <img src="upload/${best.get(book_thumbnail)}" />
+                            <p>${best.get(book_title)}</p>
+                        <div class="description">
+                            ${best.get(book_description)}
+                        </div>
                     </li>
-                </a>
+                    </a>
                 </c:forEach>
-                <li>
             </ul>
         </div>
     </section>
@@ -289,7 +240,14 @@
             </a>
         </div>
     </section>
-
+    <div class="chatting">
+        <label for="chat">
+            <img src="img/1380370.png" alt=""><br />
+            <span>오픈채팅</span>
+        </label>
+        <input type="button" id="chat" onclick="openPop()" hidden/>
+        <%--<a href="" target="_blank" onclick="openPop()">오픈채팅</a>--%>
+    </div>
     <jsp:include page="footer.jsp" />
 
     <script>
@@ -332,6 +290,11 @@
             })
 
         })
+    </script>
+    <script type="text/javascript">
+        function openPop(){
+            var popup = window.open('/chat', '1:1대화', 'width=600px,height=600px,scrollbars=no');
+        }
     </script>
 </body>
 </html>

@@ -4,8 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.sql.Timestamp;
-
 @Getter
 @Setter
 @ToString
@@ -28,7 +26,7 @@ public class BuyDTO {
         this.book_count = book_count;
     }
 
-    public BuyDTO(int book_id, String book_title, int book_price, String book_description, String book_author, String book_publisher, String id,int book_count) {
+    public BuyDTO(int book_id, String book_title, int book_price, String book_description, String book_author, String book_publisher, String id, int book_count) {
         this.book_id = book_id;
         this.book_title = book_title;
         this.book_price = book_price;

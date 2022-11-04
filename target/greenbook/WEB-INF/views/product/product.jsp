@@ -40,11 +40,15 @@
         <jsp:include page="product_header.jsp"></jsp:include>
     </div>
     <div class="bodys">
-        <div class="boxes" style="width: 45%;">
-            <jsp:include page="product_sell_manager.jsp"></jsp:include>
-        </div>
-        <div class="boxes" style="width: 45%;">
-            <jsp:include page="product_sell2_manager.jsp"></jsp:include>
+<%--        <div class="boxes" style="width: 45%;">--%>
+<%--            <jsp:include page="product_sell_manager.jsp"></jsp:include>--%>
+<%--        </div>--%>
+        <div class="boxes" style="width: 95%;">
+            <jsp:include page="product_sell2_manager.jsp">
+                <jsp:param name="selling" value="${productStatus.get(0)}"/>
+                <jsp:param name="stockOut" value="${productStatus.get(1)}"/>
+                <jsp:param name="refunded" value="${productStatus.get(2)}"/>
+            </jsp:include>
         </div>
         <div class="boxes" style="width: 95%;">
 <%--            <%@include file="product_stock_manager.jsp"%>--%>
@@ -66,36 +70,40 @@
 <%--            검색기능, 카테고리기능, 배송조회--%>
             <table class="table table-bordered">
                 <tr class="table-info">
-                    <td>책 번호</td>
+                    <c:if test="${sessionScope.get('member_class')== 2}">
+                        <td>책 번호</td>
+                    </c:if>
                     <td>책 제목</td>
                     <td>현 재고량</td>
-                    <td>상품 입고</td>
-                    <td>출고 예정</td>
+                    <td colspan="2">상품 입고</td>
                     <td colspan="2">반품 접수</td>
                     <td>반품 처리</td>
                 </tr>
-                <c:forEach items="${bookInfoList}" var="bookInfo">
+                <c:forEach items="${bookInfoList}" var="bookInfo" varStatus="status">
                     <tr class="table-light">
-                        <td>
-                            ${bookInfo.bookId}
-                        </td>
+                        <c:if test="${sessionScope.get('member_class') == 2}">
+                            <td>
+                                ${bookInfo.bookId}
+                            </td>
+                        </c:if>
                         <td>
                             ${bookInfo.bookTitle}
                         </td>
                         <td>
                             ${bookInfo.bookStock}
                         </td>
-                        <td style="position: relative">
-                            <input class="btn btn-warning" type="button" value="상품 입고 >" style="position: absolute; width: 90%; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0;">
-                        </td>
-                        <td>
-                            출고
+                        <td style="position: relative" colspan="2">
+                            <form action="product_receiving">
+                                <input type="hidden" value="${bookInfo.bookId}" name="bookId">
+                                <input type="text" name="bookStock" placeholder="99" style="width: 45%">
+                                <input class="btn btn-warning" type="submit" value="상품 입고 >" style="position: absolute; width: 45%; top: 50%; right: 5%; transform: translate(0, -50%); margin: 0;">
+                            </form>
                         </td>
                         <td>
                             반품
                         </td>
                         <td style="position: relative">
-                            <input class="btn btn-warning" type="button" value="반품 처리 >" style="position: absolute; width: 90%; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0;">
+                            <input class="btn btn-warning" type="button" value="반품 처리 >" style="position: absolute; width: 90%; top: 50%; left: 50%; transform: translate(-50%, -50%); margin: 0;" onclick="window.open('product_refund?bookId=${bookInfo.bookId}','test','width=600px,height=600px')">
                         </td>
                         <td>
                             반품처리
@@ -105,11 +113,11 @@
             </table>
             <nav aria-label="Page navigation example">
                 <ul class="pagination">
-                    <li class="page-item" style="margin: 0; <c:if test="${list.startPage<6}">display: none;</c:if>"><a class="page-link" href="/product?currentPage=${list.startPage-5}">Previous</a></li>
+                    <li class="page-item" style="margin: 0; <c:if test="${list.startPage<4}">display: none;</c:if>"><a class="page-link" href="/product?currentPage=${list.startPage-3}&searchOption=${searchOption}&searchText=${searchText}">Previous</a></li>
                     <c:forEach var="pNo" begin="${list.startPage}" end="${list.endPage}" step="1" varStatus="status">
-                        <li class="page-item" style="margin: 0;"><a class="page-link" href="/product?currentPage=${pNo}">${status.index+list.startPage-1}</a></li>
+                        <li class="page-item" style="margin: 0;"><a class="page-link" href="/product?currentPage=${pNo}&searchOption=${searchOption}&searchText=${searchText}">${status.index}</a></li>
                     </c:forEach>
-                    <li class="page-item" style="margin: 0; <c:if test="${list.endPage>=list.totalPages}">display: none;</c:if>"><a class="page-link" href="/product?currentPage=${list.startPage+5}">Next</a></li>
+                    <li class="page-item" style="margin: 0; <c:if test="${list.endPage>=list.totalPages}">display: none;</c:if>"><a class="page-link" href="/product?currentPage=${list.startPage+3}&searchOption=${searchOption}&searchText=${searchText}">Next</a></li>
                 </ul>
             </nav>
         </div>

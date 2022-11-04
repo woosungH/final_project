@@ -10,9 +10,7 @@ public interface MemberService {
     public ArrayList<MemberDTO> loginCheck(HashMap<String, String> param);
     public void logout(HttpSession session);
     public void signUp(HashMap<String, String> param);
-    public void signIn(HashMap<String, String> param);
-
-    public HashMap<String, Object> overlay(String id);
-
-    public HashMap<String, Object> emoverlay(String email);
+    public void memberModify(HashMap<String, String> param);
+    public void withdrawal(HashMap<String, String> param);
+    public void classUp(HashMap<String,String> param);
 }

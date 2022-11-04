@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%--
   Created by IntelliJ IDEA.
   User: G
@@ -11,30 +12,60 @@
     <title>Title</title>
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js" ></script>
     <script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.1.5.js"></script>
+
 </head>
 <body>
-    <form method="post" action="buy_ok" id="buy_ok">
-        <input type="hidden" value="ok" name="pages">
-    </form>
+<form method="post" action="orderAdd" id="buyOk">
+        <c:forEach var="cart1" items="${cart}" varStatus="status">
+            <input type="hidden" name="book_id" value="${cart1.book_id}">
+            <input type="hidden" name="book_price" value="${cart1.book_price}">
+            <input type="hidden" name="book_title" value="${cart1.book_title}">
+            <input type="hidden" name="book_count" value="${cart1.book_count}">
+            <input type="hidden" name="book_order_number" value="${cart1.book_id+cart1.book_count*cart1.book_price}">
+            <c:forEach var="info" items="${memberInfo}">
+                <input type="hidden" name="member_id" value="${info.member_id}">
+                <input type="hidden" name="member_name" value="${info.member_name}">
+                <input type="hidden" name="member_phone" value="${info.member_phone}">
+                <input type="hidden" name="member_email" value="${info.member_email}">
+                <input type="hidden" name="member_address" value="${info.member_address}">
+                <input type="hidden" name="member_detailAddress" value="${info.member_detailAddress}">
+                <input type="hidden" name="member_extraAddress" value="${info.member_extraAddress}">
+            </c:forEach>
+        </c:forEach>
+</form>
 </body>
-<script>$(function(){
+<script>
+    function getParameter(name) {
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+    let totalMoney = getParameter('totalMoney');
+
+    $(function(){
+
     var IMP = window.IMP; // 생략가능
     IMP.init('imp72880127'); // 'iamport' 대신 부여받은 "가맹점 식별코드"를 사용
     var msg;
-
     IMP.request_pay({
         pg : 'kakaopay',
         pay_method : 'card',
         merchant_uid : 'merchant_' + new Date().getTime(),
-        name : 'test',
-        amount : 1999,
-        buyer_email : '${addr}',
-        buyer_name : '박지원',
-        buyer_tel : '010-3583-4746',
-        buyer_addr : 'ㄴㅁㄹ',
-        buyer_postcode : '1598',
+        <c:forEach var="cart1" items="${cart}">
+        name : '${cart1.book_title}',
+        </c:forEach>
+        amount : totalMoney,
+        <c:forEach var="info" items="${memberInfo}">
+        buyer_email : '${info.member_email}',
+        buyer_name : '${info.member_name}',
+        buyer_tel : '${info.member_phone}',
+        buyer_addr : '${info.member_address}',
+        buyer_postcode : '${info.member_postcode}',
         //m_redirect_url : 'http://www.naver.com'
-    }, function(rsp) {
+        </c:forEach>
+    },function(rsp) {
         if ( rsp.success ) {
             //[1] 서버단에서 결제정보 조회를 위해 jQuery ajax로 imp_uid 전달하기
             jQuery.ajax({
@@ -64,16 +95,17 @@
             });
             //성공시 이동할 페이지
             //document.getElementById("paySuccess").submit;
-            $("#buy_ok").submit();
-            //location.href='index.jsp?pages=../buy/paySuccess?orderDNum='+o_dNums;
+            $("#buyOk").submit();
+            //location.href='orderAdd';
         } else {
             msg = '결제에 실패하였습니다.';
             msg += '에러내용 : ' + rsp.error_msg;
             //실패시 이동할 페이지
-            location.href="cart";
             alert(msg);
+            location.href="cart";
+
             //$("#product").submit();
-        }
+            }
     });
 
 });

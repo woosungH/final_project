@@ -9,16 +9,18 @@ body {
 }
 
 main {
-    height: 1000px;
+    height: 1200px;
     margin: 0 auto;
 }
 main .content {
-    margin-top: 150px;
+    margin-top: 30px;
     text-align: center;
 }
-main .content .content_tb {
-    margin-left:auto;
-    margin-right:auto;
+main .content .title {
+    padding-left: 0;
+}
+.content table .content_tb {
+    width: 1200px;
 }
 .content table .content_tb_top td{
     background-color: #cae0f0;
@@ -33,7 +35,9 @@ main .content .oder_button_bt {
     margin-top: 30px;
     margin-left: 70px;
 }
-
+main .content .oder_bt{
+    width: 80px;
+}
 .content .title {
     text-align: left;
     padding-left: 70px;

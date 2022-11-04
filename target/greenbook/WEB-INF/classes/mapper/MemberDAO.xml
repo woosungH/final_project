@@ -40,4 +40,22 @@
         WHERE member_email = #{member_email}
     </select>
 
+
+    <update id="memberModify" parameterType="hashmap">
+        UPDATE member
+        SET
+        member_pwd = #{member_pwd}, member_name = #{member_name}, member_phone = #{member_phone}, member_email = #{member_email}, member_postcode = #{member_postcode}, member_address = #{member_address}, member_extraAddress = #{member_extraAddress}, member_detailAddress = #{member_detailAddress}
+        where member_id = #{member_id}
+    </update>
+
+    <delete id="withdrawal" parameterType="hashmap">
+        DELETE FROM member
+        WHERE member_id = #{member_id}
+    </delete>
+
+    <update id="classUp" parameterType="hashmap">
+        update member
+        SET member_class = 1
+        where member_id = #{member_id}
+    </update>
 </mapper>

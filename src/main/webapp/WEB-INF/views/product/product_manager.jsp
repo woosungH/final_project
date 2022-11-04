@@ -10,18 +10,19 @@
 <html>
 <head>
     <title>Title</title>
+  <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
   <script>
-    function thumbNail(event2){
+    function thumbNail(event){
       const reader = new FileReader();
 
-      reader.onload = function (event2) {
+      reader.onload = function (event) {
         //let img = document.createElement("img");
         let img = document.getElementById("preview_image")
-        img.setAttribute("src",event2.target.result);
+        img.setAttribute("src",event.target.result);
         //img.setAttribute("class","preview_image")
         document.querySelector("div#image_container").appendChild(img);
       }
-      reader.readAsDataURL(event2.target.files[0]);
+      reader.readAsDataURL(event.target.files[0]);
     }
   </script>
   <style>
@@ -29,8 +30,25 @@
       background-color: rgba(150, 200, 255, 0.3);
       padding: 10px;
       margin: 10px;
-      border-radius: 1em;}
+      border-radius: 1em;
+      margin: 10px auto;
+    }
   </style>
+  <script src="js/jquery.min.js"></script>
+  <script>
+    const showValue = (target) => {
+      const value = target.value;
+      const text =  target.options[target.selectedIndex].text;
+      if (value=='웹소설/코믹'){
+        document.querySelector(".smallCategory").innerHTML = "<option value='판타지'>판타지</option>"+
+                "<option value='무협'>무협</option>"+"<option value='로맨스'>로맨스</option>"+"<option value='라이트노벨'>라이트노벨</option>"
+      } else {
+        document.querySelector(".smallCategory").innerHTML = "<option value='소설/시'>소설/시</option>"+
+                "<option value='에세이'>에세이</option>"+"<option value='인문/역사'>인문/역사</option>"+"<option value='과학'>과학</option>"+
+                "<option value='경제/경영'>경제/경영</option>"+"<option value='자기계발'>자기계발</option>"
+      }
+    }
+  </script>
 </head>
 <body>
   <div>
@@ -39,60 +57,68 @@
 
   <c:if test="${bookInfo2.bookId != null}">
     <div class="boxes">
-      <form method="post" action="uploadOk" enctype="multipart/form-data">
+      <form method="post"
+              <c:if test="${sessionScope.get('member_class')== 1}">
+                action = "product_upload"
+              </c:if>
+              <c:if test="${sessionScope.get('member_class')!=1}">
+                action="product_update"
+              </c:if>
+            enctype="multipart/form-data">
         <table class="table table-bordered" style="table-layout: fixed; background-color: #f7f7f7;">
           <tr>
             <td rowspan="8">
-              <input type="file" accept="image/*" name="imgfile" id="image" onchange="thumbNail(event2)" value="">
+              <input type="file" accept="image/*" name="imgfile" id="image" onchange="thumbNail(event)">
               <div id="image_container">
                 <img src="/upload/${bookImg2.storedThumbnail}" alt="" id="preview_image" style="width: 100%;">
               </div>
             </td>
             <td>상품명</td>
             <td colspan="3">
-              <input type="text" name="title" size="50" placeholder="상품명">
+              <input type="hidden" name="bookId" value="${bookInfo2.bookId}">
+              <input type="text" name="bookTitle" size="50" placeholder="상품명" value="${bookInfo2.bookTitle}">
             </td>
           </tr>
           <tr>
             <td>분야</td>
             <td colspan="3">
               카테고리1 :
-                <%--                    <input type="text" name="largeCategory" id="category1">--%>
-              <select name="largeCategory">
-                <option value="국내도서">국내도서</option>
-                <option value="외국도서">외국도서</option>
-                <option value="eBook">eBook</option>
-                <option value="웹소설/코믹">웹소설/코믹</option>
-              </select>
-              <c:set var="largeCategory" value=""/>
+              <c:choose>
+                <c:when test="${sessionScope.member_class eq 2}">
+                  <select name="largeCategory" onchange="showValue(this)">
+<%--                    <option value="">미선택</option>--%>
+                    <option value="국내도서" selected>국내도서</option>
+                    <option value="외국도서">외국도서</option>
+                    <option value="eBook">eBook</option>
+                    <option value="웹소설/코믹">웹소설/코믹</option>
+                  </select>
+                </c:when>
+                <c:otherwise>
+                  <select name="largeCategory">
+                    <option value="중고샵">중고샵</option>
+                  </select>
+                </c:otherwise>
+              </c:choose>
               카테고리2 :
-                <%--                    <input type="text" name="smallCategory" id="category2">--%>
-              <select name="smallCategory">
-                <option value="소설">소설</option>
-                <option value="인문|역사">인문|역사</option>
-                <option value="예술|종교">예술|종교</option>
-                <option value="사회|과학">사회|과학</option>
-                <option value="경제|경영">경제|경영</option>
-                <option value="자기개발">자기개발</option>
-                <option value="만화|라이트노벨">만화|라이트노벨</option>
-                <option value="여행|잡지">여행|잡지</option>
-                <option value="어린이">어린이</option>
-                <option value="유아|전집">유아|전집</option>
-                <option value="청소년">청소년</option>
-                <option value="요리|육아">요리|육아</option>
-                <option value="가정살림">가정살림</option>
-                <option value="건강취미">건강취미</option>
-                <option value="대학교제">대학교제</option>
-                <option value="국어와 외국어">국어와 외국어</option>
-                <option value="IT모바일">IT모바일</option>
-                <option value="수험서 자격증">수험서 자격증</option>
-                <option value="초등참고서">초등참고서</option>
-                <option value="중고등참고서">중고등참고서</option>
-              </select>
-              <select name="smallCategory">
-                <option value="ELT사전">ELT사전</option>
-                <option></option>
-              </select>
+              <c:choose>
+                <c:when test="${sessionScope.member_class eq 2}">
+                  <select name="smallCategory" class="smallCategory">
+                      <option value='소설/시'>소설/시</option>
+                      <option value='에세이'>에세이</option>
+                      <option value='인문/역사'>인문/역사</option>
+                      <option value='과학'>과학</option>
+                      <option value='경제/경영'>경제/경영</option>
+                      <option value='자기계발'>자기계발</option>
+                  </select>
+                </c:when>
+                <c:otherwise>
+                  <select name="smallCategory" class="smallCategory">
+                    <option value="국내도서">국내도서</option>
+                    <option value="외국도서">외국도서</option>
+                    <option value="웹소설/코믹">웹소설/코믹</option>
+                  </select>
+                </c:otherwise>
+              </c:choose>
             </td>
           </tr>
           <tr>
@@ -102,38 +128,42 @@
             <td><input type="text" name="bookPublisher" value="${bookInfo2.bookPublisher}"></td>
           </tr>
           <tr>
-            <td>상품구분</td>
-            <td><input type="text"></td>
-            <td>ISBN</td>
-            <td><input type="text"></td>
-          </tr>
-          <tr>
             <td>가격 정보</td>
-            <td colspan="3">
-              <input type="text" name="bookPrice" id="price"> 원
+            <td
+                    <c:if test="${sessionScope.get('member_class')==1}">colspan="1"</c:if>
+                    <c:if test="${sessionScope.get('member_class')!=1}">colspan="3"</c:if>
+            >
+              <input type="text" name="bookPrice" id="price" value="${bookInfo2.bookPrice}" size="15"> 원
             </td>
+            <c:if test="${sessionScope.get('member_class')==1}">
+            <td>책 상태</td>
+              <td>
+                <select name="bookStatus">
+                  <option value="1">아주 나쁨</option>
+                  <option value="3">나쁨</option>
+                  <option value="5">양호</option>
+                  <option value="7">좋음</option>
+                  <option value="9">아주 좋음</option>
+                </select>
+              </td>
+            </c:if>
           </tr>
           <tr>
             <td>발행일</td>
             <td colspan="3">
-              <input type="text" name="publicationDate" placeholder="xxxx/xx/xx">
-            </td>
-          </tr>
-          <tr>
-            <td>미성년자구매제한여부</td>
-            <td colspan="3">
-              <input type="checkbox" name="" id="checkbox">
+              <input type="text" name="publicationDate" placeholder="xxxx/xx/xx" value="${sdf.format(bookInfo2.publicationDate)}">
             </td>
           </tr>
           <tr>
             <td>책 내용 소개</td>
             <td colspan="3">
-              <textarea name="bookDescription" cols="30" rows="10"></textarea>
+              <textarea name="bookDescription" cols="30" rows="10">${bookInfo2.bookDescription}</textarea>
             </td>
           </tr>
         </table>
         <div style="text-align: center;">
-          <input type="submit" name="" id="" value="등록" class="btn btn-secondary">
+            <input type="submit" value="수정" class="btn btn-secondary">
+            <input type="button" value="삭제" class="btn btn-secondary" onclick="location.href='product_deleteOk?bookId=${bookInfo2.bookId}'">
         </div>
       </form>
     </div>
@@ -141,11 +171,9 @@
 
   <div>
     <div class="boxes">
-      <%--            <%@include file="product_stock_manager.jsp"%>--%>
       <h3>상품 관리</h3>
       <form action="product_manager">
         <div class="input-group mb-3" style="width: 700px; margin: 30px 0; background-color: white; flex-direction: row">
-          <!-- <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">{Dropdown}</button> -->
           <select class="btn btn-outline-secondary dropdown-toggle" type="button"  aria-expanded="false" name="searchOption">
             <option value="bookTitle" <c:if test="${searchOption.equals('book_title')}"> selected </c:if> >
               <a class="dropdown-item" href="#">책 제목</a>
@@ -198,24 +226,27 @@
                 ${bookInfo.bookPublisher}
             </td>
             <td>
-                ${bookInfo.publicationDate}
+                ${sdf.format(bookInfo.publicationDate)}
             </td>
             <td>
-              <input type="button" value="수정/삭제" onclick="location.href='product_manager?bookId=${bookInfo.bookId}'">
+                <input type="button" value="수정/삭제" onclick="location.href='product_manager?bookId=${bookInfo.bookId}'">
             </td>
           </tr>
         </c:forEach>
       </table>
       <nav aria-label="Page navigation example">
         <ul class="pagination">
-          <li class="page-item" style="margin: 0; <c:if test="${list.startPage<6}">display: none;</c:if>"><a class="page-link" href="/product?currentPage=${list.startPage-5}">Previous</a></li>
-          <c:forEach var="pNo" begin="${list.startPage}" end="${list.endPage}" step="1">
-            <li class="page-item" style="margin: 0;"><a class="page-link" href="/product?currentPage=${pNo}">1</a></li>
+          <li class="page-item" style="margin: 0; <c:if test="${list.startPage<4}">display: none;</c:if>"><a class="page-link" href="/product_manager?currentPage=${list.startPage-3}&searchOption=${searchOption}&searchText=${searchText}">Previous</a></li>
+          <c:forEach var="pNo" begin="${list.startPage}" end="${list.endPage}" step="1" varStatus="status">
+            <li class="page-item" style="margin: 0;"><a class="page-link" href="/product_manager?currentPage=${pNo}&searchOption=${searchOption}&searchText=${searchText}">${status.index}</a></li>
           </c:forEach>
-          <li class="page-item" style="margin: 0; <c:if test="${list.endPage>=list.totalPages}">display: none;</c:if>"><a class="page-link" href="/product?currentPage=${list.startPage+5}">Next</a></li>
+          <li class="page-item" style="margin: 0; <c:if test="${list.endPage>=list.totalPages}">display: none;</c:if>"><a class="page-link" href="/product_manager?currentPage=${list.startPage+3}&searchOption=${searchOption}&searchText=${searchText}">Next</a></li>
         </ul>
       </nav>
     </div>
   </div>
+<script>
+  $(document).ready()
+</script>
 </body>
 </html>

@@ -1,6 +1,8 @@
 package com.project.greenbook.controller;
 
 import com.project.greenbook.dto.MemberDTO;
+import com.project.greenbook.dto.OrderDTO;
+import com.project.greenbook.service.BuyService;
 import com.project.greenbook.service.MemberService;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,49 +22,37 @@ public class MemberController {
     @Autowired
     private MemberService memberService;
 
+    @Autowired
+    private BuyService service;
+
     @RequestMapping("/login")
     public String login() {
 
         return "member/login";
     }
 
-
-    @RequestMapping("/logincheck")
-    public String logincheck() {
-
-        return "member/logincheck";
-    }
-
     @RequestMapping("/loginCheck")
-    public String loginCheck(@RequestParam HashMap<String, String> param, Model model) {
+    public String loginCheck(HttpServletRequest request, @RequestParam HashMap<String, String> param) {
 
         ArrayList<MemberDTO> dtos = memberService.loginCheck(param);
         String pw = param.get("member_pwd");
-
+        HttpSession session = request.getSession();
         if (dtos.isEmpty()) {
             return "redirect:login";
         } else {
             if (pw.equals(dtos.get(0).getMember_pwd())) {
-                model.addAttribute("member_id", param.get("member_id"));
-                return "redirect:loginOk";
-
+                session.setAttribute("member_id", param.get("member_id"));
+                session.setAttribute("member_class", dtos.get(0).getMember_class());
+                return "redirect:/";
             }
             return "redirect:login";
         }
     }
 
-    @RequestMapping("/loginOk")
-    public String loginOk(@RequestParam HashMap<String, String> param, Model model) {
-        model.addAttribute("member_id", param.get("member_id"));
-
-        return "member/login_ok";
-    }
     @RequestMapping("/logout")
-    public ModelAndView logout(HttpSession session, ModelAndView mav) {
+    public String logout(HttpSession session) {
         memberService.logout(session);
-        mav.setViewName("member/login");
-        mav.addObject("message", "logout");
-        return mav;
+        return "redirect:/";
     }
 
     @RequestMapping("/signUp")
@@ -71,30 +62,68 @@ public class MemberController {
     }
 
     @RequestMapping("/signUpOk")
-    public String signUpOk(@RequestParam HashMap<String, String> param, Model model) {
+    public String signUpOk(@RequestParam HashMap<String, String> param) {
         memberService.signUp(param);
 
         return "redirect:login";
     }
 
+    // 마이페이지
     @RequestMapping("/mypage")
-    public String myPage() {
+    public String myPage(HttpServletRequest request, @RequestParam HashMap<String, String> param, Model model) {
+        HttpSession session = request.getSession();
+        param.put("member_id", (String) session.getAttribute("member_id"));
+
+        ArrayList<MemberDTO> dtos = memberService.loginCheck(param);
+        model.addAttribute("memberInfo", dtos);
+
+        System.out.println((String) session.getAttribute("book_id"));
+        param.put("member_id",(String) session.getAttribute("member_id"));
+        param.put("book_id",(String) session.getAttribute("book_id"));
+
+        ArrayList<OrderDTO> orderList = service.orderList(param);
+
+        model.addAttribute("orderList",orderList);
+        model.addAttribute("memberInfo",dtos);
+
         return "member/mypage";
     }
+    @RequestMapping("/memberModify")
+    public String modify(HttpServletRequest request, @RequestParam HashMap<String, String> param, Model model) {
+        HttpSession session = request.getSession();
+        param.put("member_id",(String) session.getAttribute("member_id"));
 
-    //아이디 중복확인
-    @RequestMapping(value = "/member/overlay",  method = RequestMethod.POST)
-    public @ResponseBody HashMap<String, Object> overlay(Model model, @RequestParam String id) {
-        log.info("고객이 입력한 아이디 : "+id);
-        return memberService.overlay(id);
+        ArrayList<MemberDTO> dtos = memberService.loginCheck(param);
+        model.addAttribute("memberInfo", dtos);
+
+        return "member/modify";
+    }
+    @RequestMapping("/memberModifyUpdate")
+    public String memberModify(HttpServletRequest request, @RequestParam HashMap<String, String> param, Model model) {
+        HttpSession session = request.getSession();
+        param.put("member_id",(String) session.getAttribute("member_id"));
+
+        ArrayList<MemberDTO> dtos = memberService.loginCheck(param);
+        model.addAttribute("memberInfo", dtos);
+
+        memberService.memberModify(param);
+
+        return "redirect:mypage";
+    }
+    @RequestMapping("/withdrawal")
+    public String withdrawal(HttpServletRequest request, @RequestParam HashMap<String, String> param) {
+        HttpSession session = request.getSession();
+        param.put("member_id", (String) session.getAttribute("member_id"));
+        memberService.withdrawal(param);
+        return "redirect:login";
     }
 
-    //이메일 중복확인
-    @RequestMapping(value = "/member/emoverlay",  method = RequestMethod.POST)
-    public @ResponseBody HashMap<String, Object> emoverlay( Model model, @RequestParam String email) {
-        log.info("고객이 입력한 이메일 : "+ email);
-        return memberService.emoverlay(email);
+    @RequestMapping("/classUp")
+    public String classUp(HttpServletRequest request, @RequestParam HashMap<String, String> param){
+        HttpSession session = request.getSession();
+        param.put("member_id", (String) session.getAttribute("member_id"));
+        session.setAttribute("member_class","1");
+        memberService.classUp(param);
+        return "redirect:/mypage";
     }
-
-
 }

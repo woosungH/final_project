@@ -12,4 +12,11 @@ public interface MemberDAO {
     public int overlay(String id);
 
     public int emoverlay(String email);
+
+    public MemberDTO findId(HashMap<String, String> param);
+    public int userCheck(HashMap<String, String> param);
+    public void memberModify(HashMap<String, String> param);
+    public void withdrawal(HashMap<String, String> param);
+    public void classUp(String member_id);
+
 }
